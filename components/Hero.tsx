@@ -4,7 +4,12 @@ export function Hero() {
   return (
     <section className="min-h-screen flex items-center justify-center px-4">
       <div className="text-center max-w-4xl animate-fade-in-up">
-        <h1 className="text-5xl md:text-7xl font-serif font-bold text-foreground mb-6">
+        <h1 className="text-5xl md:text-7xl font-serif font-bold text-foreground mb-6 flex items-center justify-center gap-4">
+          <img
+            src="/showup-icon.svg"
+            alt="Showup Icon"
+            className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0"
+          />
           <VerticalCutReveal
             splitBy="words"
             staggerFrom="first"
