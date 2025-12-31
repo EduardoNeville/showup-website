@@ -17,6 +17,7 @@
     "hextaui": "^1.2.8",
     "lucide-react": "^0.562.0",
     "magic-ui": "^0.1.0",
+    "motion": "^12.23.26",
     "motion-primitives": "^0.1.0",
     "next": "16.1.1",
     "react": "19.2.3",
