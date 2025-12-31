@@ -1,4 +1,3 @@
-import VariableFontHoverByRandomLetter from "./fancy/text/variable-font-hover-by-random-letter";
 import VerticalCutReveal from "./fancy/text/vertical-cut-reveal";
 
 export function Hero() {
