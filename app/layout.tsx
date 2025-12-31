@@ -21,6 +21,9 @@ const crimsonText = Crimson_Text({
 export const metadata: Metadata = {
   title: "Showup - Personal Challenges with Real Stakes",
   description: "Create accountable challenges with deposits and friends. Fiat or crypto-backed escrow for motivation.",
+  icons: {
+    icon: '/showup-icon.svg',
+  },
 };
 
 export default function RootLayout({
