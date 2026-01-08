@@ -326,4 +326,3 @@ forge create --rpc-url $TESTNET_RPC \
 - [API Documentation](./app/api/README.md)
 - [Stripe Crypto Onramp Docs](https://docs.stripe.com/crypto/onramp)
 - [wagmi Documentation](https://wagmi.sh)
-

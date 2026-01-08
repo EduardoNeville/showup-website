@@ -3,15 +3,11 @@
 import { useState, useCallback, useMemo } from "react";
 import { useAccount, useChainId } from "wagmi";
 import { useChallengeEscrow } from "@/lib/web3/hooks/useChallengeEscrow";
-import { useWallet } from "@/lib/web3/hooks/useWallet";
 import { StripeOnramp } from "./StripeOnramp";
 import { StripeCheckout } from "./StripeCheckout";
 import { ConnectWallet } from "./ConnectWallet";
 import { cn } from "@/lib/utils";
 import {
-  ChallengeState,
-  ChallengeStateLabels,
-  formatUSDC,
   parseUSDC,
 } from "@/types/contracts";
 import { Wallet, DollarSign, Users, CreditCard, Rocket, X, Check, Lock, Coins } from "lucide-react";
@@ -48,7 +44,6 @@ export function ChallengeDeposit({
 }: ChallengeDepositProps) {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
-  const { isOnSupportedChain } = useWallet();
 
   // Form state
   const [step, setStep] = useState<DepositStep>("connect");

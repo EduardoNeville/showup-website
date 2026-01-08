@@ -8,7 +8,7 @@ interface StripeEvent {
   id: string;
   type: string;
   data: {
-    object: any; // Use any for now to handle different event types
+    object: any; // Use any for different event types
   };
 }
 

@@ -39,7 +39,6 @@ export interface StripeCheckoutProps {
   challengeId?: string;
   customerEmail?: string;
   metadata?: Record<string, string>;
-  onSuccess?: (sessionId: string) => void;
   onError?: (error: Error) => void;
   className?: string;
   children?: React.ReactNode;
@@ -53,7 +52,6 @@ export function StripeCheckout({
   challengeId,
   customerEmail,
   metadata,
-  onSuccess,
   onError,
   className,
   children,
@@ -66,7 +64,7 @@ export function StripeCheckout({
       setIsLoading(true);
       setError(null);
 
-      const { sessionId, url } = await createCheckoutSession({
+      const { url } = await createCheckoutSession({
         amount,
         challengeId,
         customerEmail,
@@ -83,7 +81,7 @@ export function StripeCheckout({
       setIsLoading(false);
       onError?.(error);
     }
-  }, [amount, challengeId, customerEmail, metadata, onSuccess, onError]);
+  }, [amount, challengeId, customerEmail, metadata, onError]);
 
   if (children) {
     return (
