@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+tmp.md
 
 # debug
 npm-debug.log*
@@ -32,6 +33,12 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+#!.env.example
+
+# smart contracts (build artifacts)
+/contracts/artifacts
+/contracts/cache
+/contracts/node_modules
 
 # vercel
 .vercel

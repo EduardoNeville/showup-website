@@ -2,8 +2,6 @@
 
 ## Safety Nets & Second chances
 
-Before building, document exactly how money flows:
-
 **Scenario**:
 
 Alice deposits $100 for a fitness challenge.
