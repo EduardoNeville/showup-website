@@ -8,20 +8,7 @@ interface StripeEvent {
   id: string;
   type: string;
   data: {
-    object: {
-      id: string;
-      object: string;
-      status: string;
-      transaction_details?: {
-        wallet_address?: string;
-        destination_currency?: string;
-        destination_amount?: string;
-        destination_network?: string;
-        source_amount?: string;
-        source_currency?: string;
-        transaction_id?: string;
-      };
-    };
+    object: any; // Use any for now to handle different event types
   };
 }
 
@@ -52,6 +39,27 @@ export async function POST(request: NextRequest) {
 
     // Handle different event types
     switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object;
+        console.log("Checkout session completed:", {
+          sessionId: session.id,
+          paymentStatus: session.payment_status,
+          amount: session.amount_total,
+          currency: session.currency,
+          customerEmail: session.customer_details?.email,
+          metadata: session.metadata,
+        });
+
+        if (session.payment_status === "paid") {
+          // Payment successful
+          console.log("Payment successful for session:", session.id);
+          // TODO: Handle fiat payment completion
+          // For fiat payments, funds are escrowed in Stripe
+          // Update challenge status, notify user, etc.
+        }
+        break;
+      }
+
       case "crypto.onramp_session_updated": {
         const session = event.data.object;
         console.log("Onramp session updated:", {

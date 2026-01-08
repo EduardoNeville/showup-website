@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { ChallengeDeposit, ConnectWallet } from "@/components/web3";
 import Letter3DSwap from "@/components/fancy/text/letter-3d-swap";
 import { FeatureCard } from "@/components/FeatureCard";
@@ -13,14 +15,16 @@ export default function ChallengePage() {
       {/* Header */}
       <header className="border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <a href="/" className="flex items-center gap-3">
-            <img
+          <Link href="/" className="flex items-center gap-3">
+            <Image
               src="/showup-icon.svg"
               alt="Showup Icon"
-              className="w-8 h-8 drop-shadow-lg"
+              width={32}
+              height={32}
+              className="drop-shadow-lg"
             />
             <span className="text-xl font-serif font-bold">Showup</span>
-          </a>
+          </Link>
           <ConnectWallet showBalance showChain />
         </div>
       </header>
@@ -69,10 +73,12 @@ export default function ChallengePage() {
             {/* Hero Section */}
             <div className="mb-10 text-center animate-fade-in-up">
               <div className="flex justify-center mb-6">
-                <img
+                <Image
                   src="/showup-icon.svg"
                   alt="Showup Icon"
-                  className="w-16 h-16 md:w-20 md:h-20 drop-shadow-lg"
+                  width={80}
+                  height={80}
+                  className="drop-shadow-lg"
                 />
               </div>
               <Letter3DSwap
@@ -129,9 +135,9 @@ export default function ChallengePage() {
       <footer className="py-8 px-4 bg-muted text-center">
         <p className="text-muted-foreground">
           Built on Polygon with Stripe Crypto Onramp |{" "}
-          <a href="/" className="underline">
+          <Link href="/" className="underline">
             Home
-          </a>{" "}
+          </Link>{" "}
           |{" "}
           <a href="#" className="underline">
             Privacy

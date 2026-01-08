@@ -1,3 +1,4 @@
+import Image from "next/image";
 import VerticalCutReveal from "./fancy/text/vertical-cut-reveal";
 
 export function Hero() {
@@ -6,10 +7,12 @@ export function Hero() {
       <div className="text-center max-w-5xl mx-auto animate-fade-in-up">
         {/* Logo */}
         <div className="flex justify-center mb-6 md:mb-8">
-          <img
+          <Image
             src="/showup-icon.svg"
             alt="Showup Icon"
-            className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 drop-shadow-lg"
+            width={96}
+            height={96}
+            className="drop-shadow-lg"
           />
         </div>
 
