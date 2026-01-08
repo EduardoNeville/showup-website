@@ -8,6 +8,7 @@ import { StripeOnramp } from "./StripeOnramp";
 import { ConnectWallet } from "./ConnectWallet";
 import { cn } from "@/lib/utils";
 import { ChallengeState, ChallengeStateLabels, formatUSDC, parseUSDC } from "@/types/contracts";
+import { Wallet, DollarSign, Users, CreditCard, Rocket } from "lucide-react";
 
 type DepositStep = "connect" | "amount" | "guarantors" | "funding" | "approve" | "deposit" | "complete";
 
@@ -164,12 +165,12 @@ export function ChallengeDeposit({
   }, [needsApproval]);
 
   return (
-    <div className={cn("rounded-2xl border border-gray-200 bg-white p-6 shadow-lg", className)}>
+    <div className={cn("rounded-2xl neumorphic p-6", className)}>
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">{challengeTitle}</h2>
-        <p className="mt-1 text-gray-600">{challengeDescription}</p>
-        <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
+        <h2 className="text-2xl font-serif font-bold text-foreground">{challengeTitle}</h2>
+        <p className="mt-1 text-muted-foreground">{challengeDescription}</p>
+        <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
           <span>{challengeDuration} day challenge</span>
           <span>|</span>
           <span>Your USDC: {formattedBalance}</span>
@@ -179,35 +180,37 @@ export function ChallengeDeposit({
       {/* Progress Steps */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
-          {(["connect", "amount", "guarantors", "funding", "deposit"] as const).map((s, i) => (
-            <div key={s} className="flex items-center">
-              <div
-                className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium",
-                  step === s || getStepIndex(step) > i
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-500"
-                )}
-              >
-                {i + 1}
+          {([
+            { key: "connect", icon: Wallet, label: "Connect" },
+            { key: "amount", icon: DollarSign, label: "Amount" },
+            { key: "guarantors", icon: Users, label: "Friends" },
+            { key: "funding", icon: CreditCard, label: "Fund" },
+            { key: "deposit", icon: Rocket, label: "Deposit" },
+          ] as const).map(({ key, icon: Icon, label }, i) => (
+            <div key={key} className="flex items-center">
+              <div className="flex flex-col items-center">
+                <div
+                  className={cn(
+                    "flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300",
+                    step === key || getStepIndex(step) > i
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                </div>
+                <span className="mt-2 text-xs text-muted-foreground hidden sm:block">{label}</span>
               </div>
               {i < 4 && (
                 <div
                   className={cn(
-                    "h-1 w-12 sm:w-16",
-                    getStepIndex(step) > i ? "bg-blue-600" : "bg-gray-200"
+                    "h-1 w-8 sm:w-12 md:w-16 transition-all duration-300 mt-[-1rem] sm:mt-[-1.5rem]",
+                    getStepIndex(step) > i ? "bg-primary" : "bg-muted"
                   )}
                 />
               )}
             </div>
           ))}
-        </div>
-        <div className="mt-2 flex justify-between text-xs text-gray-500">
-          <span>Connect</span>
-          <span>Amount</span>
-          <span>Friends</span>
-          <span>Fund</span>
-          <span>Deposit</span>
         </div>
       </div>
 
@@ -215,12 +218,12 @@ export function ChallengeDeposit({
       <div className="min-h-[300px]">
         {/* Step 1: Connect Wallet */}
         {step === "connect" && (
-          <div className="flex flex-col items-center justify-center py-8">
-            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-blue-100">
-              <WalletIcon className="h-10 w-10 text-blue-600" />
+          <div className="flex flex-col items-center justify-center py-8 animate-fade-in-up">
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-accent">
+              <WalletIcon className="h-10 w-10 text-primary" />
             </div>
-            <h3 className="mb-2 text-lg font-semibold">Connect Your Wallet</h3>
-            <p className="mb-6 text-center text-gray-600">
+            <h3 className="mb-2 text-lg font-serif font-semibold">Connect Your Wallet</h3>
+            <p className="mb-6 text-center text-muted-foreground">
               Connect your wallet to deposit USDC and start your challenge.
             </p>
             <ConnectWallet />
@@ -229,14 +232,14 @@ export function ChallengeDeposit({
 
         {/* Step 2: Select Amount */}
         {step === "amount" && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fade-in-up">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-foreground">
                 Deposit Amount (USDC)
               </label>
               <div className="mt-2 flex items-center gap-3">
                 <div className="relative flex-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                     $
                   </span>
                   <input
@@ -245,21 +248,21 @@ export function ChallengeDeposit({
                     max="10000"
                     value={depositAmount}
                     onChange={(e) => setDepositAmount(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 py-3 pl-8 pr-4 text-lg font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-xl border border-border bg-background py-3 pl-8 pr-4 text-lg font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20 transition-all duration-300"
                     placeholder="100"
                   />
                 </div>
               </div>
-              <div className="mt-3 flex gap-2">
+              <div className="mt-3 flex gap-2 flex-wrap">
                 {[25, 50, 100, 250, 500].map((amount) => (
                   <button
                     key={amount}
                     onClick={() => setDepositAmount(amount.toString())}
                     className={cn(
-                      "rounded-lg px-3 py-1 text-sm font-medium transition-all",
+                      "rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300",
                       depositAmount === amount.toString()
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        ? "bg-primary text-primary-foreground"
+                        : "neumorphic-inset hover:bg-muted"
                     )}
                   >
                     ${amount}
@@ -268,7 +271,7 @@ export function ChallengeDeposit({
               </div>
             </div>
 
-            <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+            <p className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">
               This amount will be held in a smart contract until you complete your
               challenge or your guarantors vote on your Path of Redemption.
             </p>
@@ -276,7 +279,7 @@ export function ChallengeDeposit({
             <button
               onClick={() => setStep("guarantors")}
               disabled={!depositAmount || parseFloat(depositAmount) < 1}
-              className="w-full rounded-lg bg-blue-600 py-3 font-medium text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+              className="w-full rounded-xl bg-primary py-3 font-medium text-primary-foreground transition-all duration-300 hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Continue
             </button>
@@ -285,12 +288,12 @@ export function ChallengeDeposit({
 
         {/* Step 3: Add Guarantors */}
         {step === "guarantors" && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fade-in-up">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-foreground">
                 Guarantor Wallet Addresses
               </label>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 These friends will verify your challenge and can vote on your Path of
                 Redemption if you fail.
               </p>
@@ -304,16 +307,16 @@ export function ChallengeDeposit({
                       onChange={(e) => updateGuarantor(i, e.target.value)}
                       placeholder="0x..."
                       className={cn(
-                        "flex-1 rounded-lg border py-2 px-3 font-mono text-sm focus:outline-none focus:ring-2",
+                        "flex-1 rounded-xl border bg-background py-2 px-3 font-mono text-sm focus:outline-none focus:ring-2 transition-all duration-300",
                         g && !g.match(/^0x[a-fA-F0-9]{40}$/)
-                          ? "border-red-300 focus:ring-red-500/20"
-                          : "border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
+                          ? "border-destructive focus:ring-destructive/20"
+                          : "border-border focus:border-primary focus:ring-ring/20"
                       )}
                     />
                     {guarantors.length > 1 && (
                       <button
                         onClick={() => removeGuarantor(i)}
-                        className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                        className="rounded-xl p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-300"
                       >
                         <CloseIcon className="h-5 w-5" />
                       </button>
@@ -325,14 +328,14 @@ export function ChallengeDeposit({
               {guarantors.length < 10 && (
                 <button
                   onClick={addGuarantor}
-                  className="mt-3 text-sm font-medium text-blue-600 hover:text-blue-700"
+                  className="mt-3 text-sm font-medium text-primary hover:underline transition-all duration-300"
                 >
                   + Add another guarantor
                 </button>
               )}
             </div>
 
-            <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-800">
+            <div className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">
               <strong>Tip:</strong> Choose an odd number of guarantors (1, 3, 5) to
               avoid tie votes. A majority is required to approve your Path of
               Redemption.
@@ -341,14 +344,14 @@ export function ChallengeDeposit({
             <div className="flex gap-3">
               <button
                 onClick={() => setStep("amount")}
-                className="flex-1 rounded-lg border border-gray-300 py-3 font-medium text-gray-700 transition-all hover:bg-gray-50"
+                className="flex-1 rounded-xl border border-border py-3 font-medium text-foreground neumorphic-inset hover:bg-muted transition-all duration-300"
               >
                 Back
               </button>
               <button
                 onClick={() => setStep("funding")}
                 disabled={validGuarantors.length === 0}
-                className="flex-1 rounded-lg bg-blue-600 py-3 font-medium text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                className="flex-1 rounded-xl bg-primary py-3 font-medium text-primary-foreground transition-all duration-300 hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Continue ({validGuarantors.length} guarantor
                 {validGuarantors.length !== 1 ? "s" : ""})
@@ -359,10 +362,10 @@ export function ChallengeDeposit({
 
         {/* Step 4: Funding Method */}
         {step === "funding" && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fade-in-up">
             <div>
-              <h3 className="text-lg font-semibold">How would you like to fund?</h3>
-              <p className="mt-1 text-gray-600">
+              <h3 className="text-lg font-serif font-semibold">How would you like to fund?</h3>
+              <p className="mt-1 text-muted-foreground">
                 Deposit ${depositAmount} USDC to start your challenge.
               </p>
             </div>
@@ -373,27 +376,27 @@ export function ChallengeDeposit({
                 onClick={() => setFundingMethod("existing")}
                 disabled={!hasEnoughBalance}
                 className={cn(
-                  "flex w-full items-center rounded-xl border p-4 transition-all",
+                  "flex w-full items-center rounded-xl p-4 transition-all duration-300",
                   fundingMethod === "existing" && hasEnoughBalance
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300",
+                    ? "bg-accent border-2 border-primary"
+                    : "neumorphic hover:bg-muted",
                   !hasEnoughBalance && "cursor-not-allowed opacity-50"
                 )}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
-                  <CoinIcon className="h-6 w-6 text-purple-600" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent">
+                  <CoinIcon className="h-6 w-6 text-primary" />
                 </div>
                 <div className="ml-4 flex-1 text-left">
-                  <p className="font-medium text-gray-900">Use Existing USDC</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="font-medium text-foreground">Use Existing USDC</p>
+                  <p className="text-sm text-muted-foreground">
                     Balance: {formattedBalance}
                     {!hasEnoughBalance && (
-                      <span className="ml-2 text-red-500">(Insufficient)</span>
+                      <span className="ml-2 text-destructive">(Insufficient)</span>
                     )}
                   </p>
                 </div>
                 {fundingMethod === "existing" && hasEnoughBalance && (
-                  <CheckIcon className="h-6 w-6 text-blue-600" />
+                  <CheckIcon className="h-6 w-6 text-primary" />
                 )}
               </button>
 
@@ -401,30 +404,30 @@ export function ChallengeDeposit({
               <button
                 onClick={() => setFundingMethod("onramp")}
                 className={cn(
-                  "flex w-full items-center rounded-xl border p-4 transition-all",
+                  "flex w-full items-center rounded-xl p-4 transition-all duration-300",
                   fundingMethod === "onramp"
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "bg-accent border-2 border-primary"
+                    : "neumorphic hover:bg-muted"
                 )}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
-                  <CardIcon className="h-6 w-6 text-green-600" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent">
+                  <CardIcon className="h-6 w-6 text-primary" />
                 </div>
                 <div className="ml-4 flex-1 text-left">
-                  <p className="font-medium text-gray-900">Buy with Card</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="font-medium text-foreground">Buy with Card</p>
+                  <p className="text-sm text-muted-foreground">
                     Purchase USDC instantly via Stripe
                   </p>
                 </div>
                 {fundingMethod === "onramp" && (
-                  <CheckIcon className="h-6 w-6 text-blue-600" />
+                  <CheckIcon className="h-6 w-6 text-primary" />
                 )}
               </button>
             </div>
 
             {/* Stripe Onramp */}
             {fundingMethod === "onramp" && address && (
-              <div className="mt-6 rounded-xl border border-gray-200 p-4">
+              <div className="mt-6 rounded-xl neumorphic p-4">
                 <StripeOnramp
                   walletAddress={address}
                   network="polygon"
@@ -439,13 +442,13 @@ export function ChallengeDeposit({
               <div className="flex gap-3">
                 <button
                   onClick={() => setStep("guarantors")}
-                  className="flex-1 rounded-lg border border-gray-300 py-3 font-medium text-gray-700 transition-all hover:bg-gray-50"
+                  className="flex-1 rounded-xl border border-border py-3 font-medium text-foreground neumorphic-inset hover:bg-muted transition-all duration-300"
                 >
                   Back
                 </button>
                 <button
                   onClick={() => setStep(needsApproval ? "approve" : "deposit")}
-                  className="flex-1 rounded-lg bg-blue-600 py-3 font-medium text-white transition-all hover:bg-blue-700"
+                  className="flex-1 rounded-xl bg-primary py-3 font-medium text-primary-foreground transition-all duration-300 hover:scale-[1.02]"
                 >
                   Continue to {needsApproval ? "Approve" : "Deposit"}
                 </button>
@@ -456,17 +459,17 @@ export function ChallengeDeposit({
 
         {/* Step 5: Approve */}
         {step === "approve" && (
-          <div className="flex flex-col items-center justify-center py-8">
-            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100">
-              <LockIcon className="h-10 w-10 text-amber-600" />
+          <div className="flex flex-col items-center justify-center py-8 animate-fade-in-up">
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-accent">
+              <LockIcon className="h-10 w-10 text-primary" />
             </div>
-            <h3 className="mb-2 text-lg font-semibold">Approve USDC Spending</h3>
-            <p className="mb-6 text-center text-gray-600">
+            <h3 className="mb-2 text-lg font-serif font-semibold">Approve USDC Spending</h3>
+            <p className="mb-6 text-center text-muted-foreground">
               Allow the escrow contract to hold your USDC during the challenge.
             </p>
 
             {escrow.writeError && (
-              <p className="mb-4 text-sm text-red-600">
+              <p className="mb-4 text-sm text-destructive">
                 Error: {escrow.writeError.message}
               </p>
             )}
@@ -474,11 +477,11 @@ export function ChallengeDeposit({
             <button
               onClick={handleApprove}
               disabled={escrow.isWritePending || escrow.isConfirming}
-              className="w-full max-w-xs rounded-lg bg-amber-500 py-3 font-medium text-white transition-all hover:bg-amber-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+              className="w-full max-w-xs rounded-xl bg-primary py-3 font-medium text-primary-foreground transition-all duration-300 hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {escrow.isWritePending || escrow.isConfirming ? (
                 <span className="flex items-center justify-center">
-                  <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
                   {escrow.isConfirming ? "Confirming..." : "Approving..."}
                 </span>
               ) : (
@@ -489,7 +492,7 @@ export function ChallengeDeposit({
             {escrow.isConfirmed && (
               <button
                 onClick={() => setStep("deposit")}
-                className="mt-4 text-blue-600 underline hover:no-underline"
+                className="mt-4 text-primary underline hover:no-underline transition-all duration-300"
               >
                 Continue to deposit
               </button>
@@ -499,33 +502,33 @@ export function ChallengeDeposit({
 
         {/* Step 6: Deposit */}
         {step === "deposit" && (
-          <div className="flex flex-col items-center justify-center py-8">
-            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-blue-100">
-              <RocketIcon className="h-10 w-10 text-blue-600" />
+          <div className="flex flex-col items-center justify-center py-8 animate-fade-in-up">
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-accent">
+              <RocketIcon className="h-10 w-10 text-primary" />
             </div>
-            <h3 className="mb-2 text-lg font-semibold">Confirm Your Challenge</h3>
-            <p className="mb-6 text-center text-gray-600">
+            <h3 className="mb-2 text-lg font-serif font-semibold">Confirm Your Challenge</h3>
+            <p className="mb-6 text-center text-muted-foreground">
               Deposit ${depositAmount} USDC to start your {challengeDuration}-day
               challenge.
             </p>
 
-            <div className="mb-6 w-full max-w-sm rounded-lg bg-gray-50 p-4 text-sm">
+            <div className="mb-6 w-full max-w-sm rounded-xl bg-muted p-4 text-sm">
               <div className="flex justify-between py-1">
-                <span className="text-gray-500">Amount</span>
+                <span className="text-muted-foreground">Amount</span>
                 <span className="font-medium">${depositAmount} USDC</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className="text-gray-500">Duration</span>
+                <span className="text-muted-foreground">Duration</span>
                 <span className="font-medium">{challengeDuration} days</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className="text-gray-500">Guarantors</span>
+                <span className="text-muted-foreground">Guarantors</span>
                 <span className="font-medium">{validGuarantors.length}</span>
               </div>
             </div>
 
             {escrow.writeError && (
-              <p className="mb-4 text-sm text-red-600">
+              <p className="mb-4 text-sm text-destructive">
                 Error: {escrow.writeError.message}
               </p>
             )}
@@ -533,11 +536,11 @@ export function ChallengeDeposit({
             <button
               onClick={handleDeposit}
               disabled={escrow.isWritePending || escrow.isConfirming}
-              className="w-full max-w-xs rounded-lg bg-blue-600 py-3 font-medium text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+              className="w-full max-w-xs rounded-xl bg-primary py-3 font-medium text-primary-foreground transition-all duration-300 hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {escrow.isWritePending || escrow.isConfirming ? (
                 <span className="flex items-center justify-center">
-                  <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
                   {escrow.isConfirming ? "Confirming..." : "Depositing..."}
                 </span>
               ) : (
@@ -549,20 +552,20 @@ export function ChallengeDeposit({
 
         {/* Step 7: Complete */}
         {step === "complete" && (
-          <div className="flex flex-col items-center justify-center py-8">
-            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
-              <CheckIcon className="h-10 w-10 text-green-600" />
+          <div className="flex flex-col items-center justify-center py-8 animate-fade-in-up">
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-accent">
+              <CheckIcon className="h-10 w-10 text-primary" />
             </div>
-            <h3 className="mb-2 text-lg font-semibold">Challenge Started!</h3>
-            <p className="mb-2 text-center text-gray-600">
+            <h3 className="mb-2 text-lg font-serif font-semibold">Challenge Started!</h3>
+            <p className="mb-2 text-center text-muted-foreground">
               Your ${depositAmount} USDC is now held in escrow.
             </p>
-            <p className="mb-6 text-center text-gray-600">
+            <p className="mb-6 text-center text-muted-foreground">
               Complete your challenge to get it back!
             </p>
 
             {challengeId && (
-              <p className="font-mono text-xs text-gray-400">
+              <p className="font-mono text-xs text-muted-foreground">
                 Challenge ID: {challengeId.slice(0, 16)}...
               </p>
             )}

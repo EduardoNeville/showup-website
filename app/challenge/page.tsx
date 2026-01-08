@@ -2,32 +2,36 @@
 
 import { useState } from "react";
 import { ChallengeDeposit, ConnectWallet } from "@/components/web3";
+import Letter3DSwap from "@/components/fancy/text/letter-3d-swap";
+import { FeatureCard } from "@/components/FeatureCard";
 
 export default function ChallengePage() {
   const [challengeId, setChallengeId] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-purple-600">
-              <span className="text-lg font-bold text-white">S</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900">Showup</span>
-          </div>
+      <header className="border-b border-border bg-background/80 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+          <a href="/" className="flex items-center gap-3">
+            <img
+              src="/showup-icon.svg"
+              alt="Showup Icon"
+              className="w-8 h-8 drop-shadow-lg"
+            />
+            <span className="text-xl font-serif font-bold">Showup</span>
+          </a>
           <ConnectWallet showBalance showChain />
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-2xl px-6 py-12">
+      <main className="mx-auto max-w-2xl px-4 py-12 md:py-16">
         {challengeId ? (
-          <div className="rounded-2xl border border-green-200 bg-green-50 p-8 text-center">
-            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+          <div className="neumorphic rounded-2xl p-8 text-center animate-fade-in-up">
+            <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-accent">
               <svg
-                className="h-8 w-8 text-green-600"
+                className="h-10 w-10 text-primary"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -40,18 +44,22 @@ export default function ChallengePage() {
                 />
               </svg>
             </div>
-            <h1 className="mb-2 text-2xl font-bold text-green-900">
+            <Letter3DSwap
+              as="h1"
+              mainClassName="text-3xl md:text-4xl font-serif font-bold mb-4"
+              staggerDuration={0.02}
+            >
               Challenge Created!
-            </h1>
-            <p className="mb-4 text-green-700">
+            </Letter3DSwap>
+            <p className="mb-4 text-lg text-muted-foreground">
               Your challenge is now active. Good luck!
             </p>
-            <p className="font-mono text-sm text-green-600">
+            <p className="font-mono text-sm text-muted-foreground">
               ID: {challengeId.slice(0, 20)}...
             </p>
             <button
               onClick={() => setChallengeId(null)}
-              className="mt-6 rounded-lg bg-green-600 px-6 py-2 font-medium text-white hover:bg-green-700"
+              className="mt-8 px-8 py-3 bg-primary text-primary-foreground rounded-xl font-medium neumorphic hover:scale-105 transition-all duration-300"
             >
               Create Another Challenge
             </button>
@@ -59,11 +67,22 @@ export default function ChallengePage() {
         ) : (
           <>
             {/* Hero Section */}
-            <div className="mb-8 text-center">
-              <h1 className="text-4xl font-bold text-gray-900">
+            <div className="mb-10 text-center animate-fade-in-up">
+              <div className="flex justify-center mb-6">
+                <img
+                  src="/showup-icon.svg"
+                  alt="Showup Icon"
+                  className="w-16 h-16 md:w-20 md:h-20 drop-shadow-lg"
+                />
+              </div>
+              <Letter3DSwap
+                as="h1"
+                mainClassName="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-4"
+                staggerDuration={0.02}
+              >
                 Start Your Challenge
-              </h1>
-              <p className="mt-3 text-lg text-gray-600">
+              </Letter3DSwap>
+              <p className="text-base md:text-lg text-muted-foreground max-w-lg mx-auto leading-relaxed">
                 Put your money where your motivation is. Your friends will hold
                 you accountable.
               </p>
@@ -79,82 +98,49 @@ export default function ChallengePage() {
             />
 
             {/* Info Cards */}
-            <div className="mt-12 grid gap-6 sm:grid-cols-3">
-              <div className="rounded-xl border border-gray-200 bg-white p-5">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                  <svg
-                    className="h-5 w-5 text-blue-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="font-semibold text-gray-900">Secure Escrow</h3>
-                <p className="mt-1 text-sm text-gray-600">
-                  Funds held in a smart contract, not by us.
-                </p>
+            <section className="mt-16 py-12 px-4 bg-muted -mx-4 rounded-2xl">
+              <Letter3DSwap
+                as="h2"
+                mainClassName="text-2xl md:text-3xl font-serif font-bold text-center mb-10"
+                staggerDuration={0.02}
+              >
+                Why Showup Works
+              </Letter3DSwap>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-right">
+                <FeatureCard
+                  title="Secure Escrow"
+                  description="Funds held in a smart contract, not by us."
+                />
+                <FeatureCard
+                  title="Friend Guarantors"
+                  description="Your friends verify success and can grant second chances."
+                />
+                <FeatureCard
+                  title="Easy Funding"
+                  description="Use existing crypto or buy with a card via Stripe."
+                />
               </div>
-
-              <div className="rounded-xl border border-gray-200 bg-white p-5">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
-                  <svg
-                    className="h-5 w-5 text-purple-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="font-semibold text-gray-900">Friend Guarantors</h3>
-                <p className="mt-1 text-sm text-gray-600">
-                  Your friends verify success and can grant second chances.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-gray-200 bg-white p-5">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
-                  <svg
-                    className="h-5 w-5 text-green-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="font-semibold text-gray-900">Easy Funding</h3>
-                <p className="mt-1 text-sm text-gray-600">
-                  Use existing crypto or buy with a card via Stripe.
-                </p>
-              </div>
-            </div>
+            </section>
           </>
         )}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white py-8">
-        <div className="mx-auto max-w-7xl px-6 text-center text-sm text-gray-500">
-          <p>Built on Polygon with Stripe Crypto Onramp</p>
-        </div>
+      <footer className="py-8 px-4 bg-muted text-center">
+        <p className="text-muted-foreground">
+          Built on Polygon with Stripe Crypto Onramp |{" "}
+          <a href="/" className="underline">
+            Home
+          </a>{" "}
+          |{" "}
+          <a href="#" className="underline">
+            Privacy
+          </a>{" "}
+          |{" "}
+          <a href="#" className="underline">
+            Terms
+          </a>
+        </p>
       </footer>
     </div>
   );
