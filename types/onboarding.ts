@@ -33,9 +33,10 @@ export interface ChallengeDraft {
   frequency?: FrequencyType;
   frequencyDetails?: FrequencyDetails;
   durationDays?: number;
-  notificationSettings?: NotificationSettings;
-  guarantors?: string[];
-  aiSuggested?: boolean;
+   notificationSettings?: NotificationSettings;
+   guarantors?: string[];
+   guarantorsCount?: number;
+   aiSuggested?: boolean;
   aiConversationId?: string;
 }
 

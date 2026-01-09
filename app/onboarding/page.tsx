@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -24,12 +24,10 @@ import {
   Calendar,
   Share2,
   ChevronRight,
-  ChevronLeft,
-  Send,
-  Sparkles,
-  X,
-  Check,
-  ArrowRight,
+   ChevronLeft,
+   Send,
+   Sparkles,
+   ArrowRight,
 } from "lucide-react";
 
 const STEPS: { key: OnboardingStep; icon: typeof FileText; label: string }[] = [
@@ -82,8 +80,10 @@ export default function OnboardingPage() {
   const [sessionId, setSessionId] = useState<string>("");
   const [currentStep, setCurrentStep] = useState<OnboardingStep>("terms");
   const [stepsCompleted, setStepsCompleted] = useState<OnboardingStep[]>([]);
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [stepStartTime, setStepStartTime] = useState<number>(Date.now());
+   const [termsAccepted, setTermsAccepted] = useState(false);
+   const [stepStartTime, setStepStartTime] = useState<number>(Date.now());
+   const [showingPay, setShowingPay] = useState(false);
+   const currentButtonRef = useRef<HTMLButtonElement>(null);
 
   // AI Chat state
   const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
@@ -92,22 +92,23 @@ export default function OnboardingPage() {
   const [conversationId, setConversationId] = useState<string>("");
   const [suggestedChallenges, setSuggestedChallenges] = useState<SuggestedChallenge[]>([]);
 
-  // Challenge draft state
-  const [challengeDraft, setChallengeDraft] = useState<ChallengeDraft>({
-    title: "",
-    description: "",
-    type: "behavioral",
-    frequency: "daily",
-    durationDays: 14,
-    depositAmount: 50,
-    depositRecipient: "platform",
-    guarantors: [""],
-    notificationSettings: {
-      enabled: true,
-      pushEnabled: true,
-      emailEnabled: true,
-    },
-  });
+   // Challenge draft state
+   const [challengeDraft, setChallengeDraft] = useState<ChallengeDraft>({
+     title: "",
+     description: "",
+     type: "behavioral",
+     frequency: "daily",
+     durationDays: 14,
+     depositAmount: 50,
+     depositRecipient: "platform",
+     guarantors: [],
+     guarantorsCount: 1,
+     notificationSettings: {
+       enabled: true,
+       pushEnabled: true,
+       emailEnabled: true,
+     },
+   });
 
   // Get auth token
   const getToken = useCallback(() => {
@@ -156,7 +157,14 @@ export default function OnboardingPage() {
     };
 
     initSession();
-  }, [getToken, router]);
+   }, [getToken, router]);
+
+   // Scroll current step into view on mobile
+   useEffect(() => {
+     if (currentButtonRef.current) {
+       currentButtonRef.current.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+     }
+   }, [currentStep]);
 
   // Update session when step changes
   const updateSession = useCallback(
@@ -216,7 +224,7 @@ export default function OnboardingPage() {
         const nextStep = STEPS[currentIndex + 1].key;
         setCurrentStep(nextStep);
         setStepStartTime(Date.now());
-        updateSession({ currentStep: nextStep, stepsCompleted: newCompleted, challengeDraft });
+         updateSession({ currentStep: nextStep, stepsCompleted: newCompleted });
       }
     },
     [stepsCompleted, updateSession, challengeDraft]
@@ -346,35 +354,7 @@ export default function OnboardingPage() {
     completeStep("ai-chat");
   };
 
-  // Update guarantors
-  const updateGuarantor = (index: number, value: string) => {
-    const newGuarantors = [...(challengeDraft.guarantors || [""])];
-    newGuarantors[index] = value;
-    setChallengeDraft(prev => ({ ...prev, guarantors: newGuarantors }));
-  };
 
-  const addGuarantor = () => {
-    if ((challengeDraft.guarantors?.length || 0) < 10) {
-      setChallengeDraft(prev => ({
-        ...prev,
-        guarantors: [...(prev.guarantors || []), ""],
-      }));
-    }
-  };
-
-  const removeGuarantor = (index: number) => {
-    if ((challengeDraft.guarantors?.length || 0) > 1) {
-      setChallengeDraft(prev => ({
-        ...prev,
-        guarantors: prev.guarantors?.filter((_, i) => i !== index),
-      }));
-    }
-  };
-
-  // Validate guarantors
-  const validGuarantors = (challengeDraft.guarantors || []).filter(
-    g => g.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
-  );
 
   // Complete onboarding
   const handleCompleteOnboarding = async () => {
@@ -388,13 +368,10 @@ export default function OnboardingPage() {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          sessionId,
-          challengeDraft: {
-            ...challengeDraft,
-            guarantors: validGuarantors,
-          },
-        }),
+         body: JSON.stringify({
+           sessionId,
+           challengeDraft,
+         }),
       });
 
       if (!response.ok) {
@@ -452,37 +429,34 @@ export default function OnboardingPage() {
       </header>
 
       {/* Progress Steps */}
-      <div className="fixed top-16 left-0 right-0 z-40 bg-background/80 backdrop-blur-md border-b border-border/50 py-4 overflow-x-auto">
+      <div className="fixed top-16 left-0 right-0 z-40 bg-background/80 backdrop-blur-md border-b border-border/50 py-4 overflow-x-auto" style={{ scrollBehavior: 'smooth' }}>
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex items-center justify-between min-w-max">
-            {STEPS.map(({ key, icon: Icon, label }, i) => (
-              <div key={key} className="flex items-center">
-                <button
-                  onClick={() => goToStep(key)}
-                  disabled={i > currentStepIndex && !stepsCompleted.includes(STEPS[i - 1]?.key)}
-                  className={cn(
-                    "flex flex-col items-center transition-all duration-300",
-                    i <= currentStepIndex || stepsCompleted.includes(key)
-                      ? "cursor-pointer"
-                      : "cursor-not-allowed opacity-50"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300",
-                      currentStep === key
-                        ? "bg-primary text-primary-foreground scale-110"
-                        : stepsCompleted.includes(key)
-                        ? "bg-green-500 text-white"
-                        : "bg-muted text-muted-foreground"
-                    )}
-                  >
-                    {stepsCompleted.includes(key) ? (
-                      <Check className="h-5 w-5" />
-                    ) : (
-                      <Icon className="h-5 w-5" />
-                    )}
-                  </div>
+             {STEPS.map(({ key, icon: Icon, label }, i) => (
+               <div key={key} className="flex items-center">
+                 <button
+                   ref={currentStep === key ? currentButtonRef : null}
+                   onClick={() => goToStep(key)}
+                   disabled={i > currentStepIndex && !stepsCompleted.includes(STEPS[i - 1]?.key)}
+                   className={cn(
+                     "flex flex-col items-center transition-all duration-300",
+                     i <= currentStepIndex || stepsCompleted.includes(key)
+                       ? "cursor-pointer"
+                       : "cursor-not-allowed opacity-50"
+                   )}
+                 >
+                   <div
+                     className={cn(
+                       "flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300",
+                       currentStep === key
+                         ? "bg-primary text-primary-foreground scale-110"
+                         : stepsCompleted.includes(key)
+                         ? "bg-green-500 text-white"
+                         : "bg-muted text-muted-foreground"
+                     )}
+                   >
+                     <Icon className="h-5 w-5" />
+                   </div>
                   <span className="mt-1 text-xs text-muted-foreground hidden sm:block">
                     {label}
                   </span>
@@ -534,7 +508,7 @@ export default function OnboardingPage() {
 
               <div className="neumorphic rounded-2xl p-6 mb-6">
                 <h2 className="text-xl font-serif font-bold mb-4">Terms of Service</h2>
-                <div className="h-64 overflow-y-auto text-sm text-muted-foreground space-y-4 pr-4">
+                <div className="h-64 overflow-y-auto text-sm text-muted-foreground space-y-4 pr-4" style={{ WebkitOverflowScrolling: 'touch' }}>
                   <h3 className="font-semibold text-foreground">1. Acceptance of Terms</h3>
                   <p>
                     By creating an account and using Showup, you agree to these Terms of Service. 
@@ -922,52 +896,7 @@ export default function OnboardingPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-3">Where does the deposit go?</label>
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => setChallengeDraft(prev => ({ ...prev, depositRecipient: "platform" }))}
-                      className={cn(
-                        "w-full p-4 rounded-xl border text-left transition-all",
-                        challengeDraft.depositRecipient === "platform"
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
-                      )}
-                    >
-                      <p className="font-medium">Platform Escrow</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Securely held until you complete your challenge
-                      </p>
-                    </button>
-                    <button
-                      onClick={() => setChallengeDraft(prev => ({ ...prev, depositRecipient: "friend" }))}
-                      className={cn(
-                        "w-full p-4 rounded-xl border text-left transition-all",
-                        challengeDraft.depositRecipient === "friend"
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
-                      )}
-                    >
-                      <p className="font-medium">Friend Challenge</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Link your challenge with a friend for extra accountability
-                      </p>
-                    </button>
-                  </div>
-                </div>
 
-                {challengeDraft.depositRecipient === "friend" && (
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Friend&apos;s Email</label>
-                    <input
-                      type="email"
-                      value={challengeDraft.linkedFriendEmail || ""}
-                      onChange={(e) => setChallengeDraft(prev => ({ ...prev, linkedFriendEmail: e.target.value }))}
-                      placeholder="friend@example.com"
-                      className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-primary transition-all"
-                    />
-                  </div>
-                )}
 
                 <div className="rounded-xl bg-accent p-4 text-sm">
                   <p className="text-accent-foreground">
@@ -1120,19 +1049,36 @@ export default function OnboardingPage() {
 
                     <div>
                       <label className="block text-sm font-medium mb-2">Reminder Time</label>
-                      <input
-                        type="time"
-                        value={challengeDraft.notificationSettings?.reminderTime || "09:00"}
-                        onChange={(e) => setChallengeDraft(prev => ({
-                          ...prev,
-                          notificationSettings: {
-                            enabled: prev.notificationSettings?.enabled ?? true,
-                            ...prev.notificationSettings,
-                            reminderTime: e.target.value,
-                          },
-                        }))}
-                        className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-primary transition-all"
-                      />
+                       <select
+                         value={challengeDraft.notificationSettings?.reminderTime || "09:00"}
+                         onChange={(e) => setChallengeDraft(prev => ({
+                           ...prev,
+                           notificationSettings: {
+                             enabled: prev.notificationSettings?.enabled ?? true,
+                             ...prev.notificationSettings,
+                             reminderTime: e.target.value,
+                           },
+                         }))}
+                         className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-primary transition-all"
+                       >
+                         <option value="06:00">6:00 AM</option>
+                         <option value="07:00">7:00 AM</option>
+                         <option value="08:00">8:00 AM</option>
+                         <option value="09:00">9:00 AM</option>
+                         <option value="10:00">10:00 AM</option>
+                         <option value="11:00">11:00 AM</option>
+                         <option value="12:00">12:00 PM</option>
+                         <option value="13:00">1:00 PM</option>
+                         <option value="14:00">2:00 PM</option>
+                         <option value="15:00">3:00 PM</option>
+                         <option value="16:00">4:00 PM</option>
+                         <option value="17:00">5:00 PM</option>
+                         <option value="18:00">6:00 PM</option>
+                         <option value="19:00">7:00 PM</option>
+                         <option value="20:00">8:00 PM</option>
+                         <option value="21:00">9:00 PM</option>
+                         <option value="22:00">10:00 PM</option>
+                       </select>
                     </div>
                   </div>
                 )}
@@ -1315,92 +1261,70 @@ export default function OnboardingPage() {
                   </div>
                 </div>
 
-                {/* Guarantors */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Guarantor Emails</label>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    They&apos;ll receive an email invitation to join your challenge.
-                  </p>
-                  <div className="space-y-2">
-                    {(challengeDraft.guarantors || [""]).map((g, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <input
-                          type="email"
-                          value={g}
-                          onChange={(e) => updateGuarantor(i, e.target.value)}
-                          placeholder="friend@example.com"
-                          className={cn(
-                            "flex-1 px-4 py-3 rounded-xl border bg-background focus:outline-none focus:ring-2 transition-all",
-                            g && !g.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
-                              ? "border-destructive focus:ring-destructive/20"
-                              : "border-border focus:border-primary focus:ring-ring/20"
-                          )}
-                        />
-                        {g.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) && (
-                          <Check className="h-5 w-5 text-green-500" />
-                        )}
-                        {(challengeDraft.guarantors?.length || 0) > 1 && (
-                          <button
-                            onClick={() => removeGuarantor(i)}
-                            className="p-2 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
-                          >
-                            <X className="h-5 w-5" />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  {(challengeDraft.guarantors?.length || 0) < 10 && (
-                    <button
-                      onClick={addGuarantor}
-                      className="mt-2 text-sm font-medium text-primary hover:underline"
-                    >
-                      + Add another guarantor
-                    </button>
-                  )}
-                </div>
+                 {/* Number of Guarantors */}
+                 <div>
+                   <label className="block text-sm font-medium mb-2">Number of Guarantors Desired</label>
+                   <input
+                     type="number"
+                     min="1"
+                     max="10"
+                     value={challengeDraft.guarantorsCount || 1}
+                     onChange={(e) => setChallengeDraft(prev => ({ ...prev, guarantorsCount: parseInt(e.target.value) || 1 }))}
+                     className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-primary transition-all"
+                   />
+                 </div>
 
-                <div className="rounded-xl bg-accent p-4 text-sm">
-                  <p className="text-accent-foreground">
-                    <strong>Tip:</strong> Choose an odd number of guarantors (1, 3, 5) 
-                    to avoid tie votes. Pick people who genuinely want to see you succeed.
-                  </p>
-                </div>
+                 {/* Share Link */}
+                 <div>
+                   <label className="block text-sm font-medium mb-2">Share Challenge Link</label>
+                   <button
+                     onClick={() => navigator.clipboard.writeText(`https://showup.com/onboarding/join?session=${sessionId}`)}
+                     className="w-full py-3 rounded-xl border border-border hover:bg-muted transition-all"
+                   >
+                     Copy Share Link
+                   </button>
+                 </div>
 
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => goToStep("activity-rate")}
-                    className="flex-1 py-3 rounded-xl border border-border hover:bg-muted transition-all"
-                  >
-                    <ChevronLeft className="inline-block mr-2 h-5 w-5" />
-                    Back
-                  </button>
-                  <button
-                    onClick={handleCompleteOnboarding}
-                    disabled={validGuarantors.length === 0}
-                    className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-medium transition-all hover:scale-[1.02] disabled:opacity-50"
-                  >
-                    Complete & Pay
-                    <ArrowRight className="inline-block ml-2 h-5 w-5" />
-                  </button>
-                </div>
+                 <div className="rounded-xl bg-accent p-4 text-sm">
+                   <p className="text-accent-foreground">
+                     <strong>Tip:</strong> Share the link with friends to invite them as guarantors. 
+                     They can join to help hold you accountable.
+                   </p>
+                 </div>
 
-                {/* Stripe Checkout (shown after completing onboarding) */}
-                {validGuarantors.length > 0 && (
-                  <div className="mt-4">
-                    <StripeCheckout
-                      amount={challengeDraft.depositAmount || 50}
-                      challengeId={`challenge_${Date.now()}_${Math.random().toString(36).substring(7)}`}
-                      metadata={{
-                        challengeTitle: challengeDraft.title || "My Challenge",
-                        challengeDuration: (challengeDraft.durationDays || 14).toString(),
-                        metadataUri: "",
-                        guarantors: JSON.stringify(validGuarantors),
-                      }}
-                      onError={(error) => setError(typeof error === 'string' ? error : error.message || 'Payment error')}
-                    />
-                  </div>
-                )}
+                 {showingPay ? (
+                   <div className="mt-4">
+                     <StripeCheckout
+                       amount={challengeDraft.depositAmount || 50}
+                       challengeId={`challenge_${Date.now()}_${Math.random().toString(36).substring(7)}`}
+                       metadata={{
+                         challengeTitle: challengeDraft.title || "My Challenge",
+                         challengeDuration: (challengeDraft.durationDays || 14).toString(),
+                         metadataUri: "",
+                         guarantorsCount: (challengeDraft.guarantorsCount || 1).toString(),
+                       }}
+                       onError={(error) => setError(typeof error === 'string' ? error : error.message || 'Payment error')}
+                     />
+                   </div>
+                 ) : (
+                   <div className="flex gap-3">
+                     <button
+                       onClick={() => goToStep("activity-rate")}
+                       className="flex-1 py-3 rounded-xl border border-border hover:bg-muted transition-all"
+                     >
+                       <ChevronLeft className="inline-block mr-2 h-5 w-5" />
+                       Back
+                     </button>
+                     <button
+                       onClick={() => setShowingPay(true)}
+                       disabled={!challengeDraft.guarantorsCount}
+                       className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-medium transition-all hover:scale-[1.02] disabled:opacity-50"
+                     >
+                       Complete & Pay
+                       <ArrowRight className="inline-block ml-2 h-5 w-5" />
+                     </button>
+                   </div>
+                 )}
               </div>
             </div>
           )}
