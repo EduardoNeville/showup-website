@@ -42,8 +42,43 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+-- Challenges table
+CREATE TABLE IF NOT EXISTS challenges (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    challenge_id VARCHAR(255) UNIQUE NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    duration_days INTEGER NOT NULL,
+    amount_usd DECIMAL(10,2) NOT NULL,
+    user_email VARCHAR(255) NOT NULL,
+    guarantors JSONB DEFAULT '[]',
+    status VARCHAR(50) NOT NULL DEFAULT 'pending', -- pending, created, failed, completed, voting, redeemed
+    stripe_session_id VARCHAR(255),
+    stripe_payment_intent_id VARCHAR(255),
+    on_chain_challenge_id VARCHAR(255),
+    transaction_hash VARCHAR(255),
+    block_number BIGINT,
+    metadata_uri TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    started_at TIMESTAMP WITH TIME ZONE,
+    ends_at TIMESTAMP WITH TIME ZONE,
+    error_message TEXT
+);
+
+-- Create indexes for challenges
+CREATE INDEX IF NOT EXISTS idx_challenges_challenge_id ON challenges(challenge_id);
+CREATE INDEX IF NOT EXISTS idx_challenges_user_email ON challenges(user_email);
+CREATE INDEX IF NOT EXISTS idx_challenges_status ON challenges(status);
+CREATE INDEX IF NOT EXISTS idx_challenges_stripe_session_id ON challenges(stripe_session_id);
+
 -- Trigger to auto-update updated_at
 CREATE TRIGGER update_users_updated_at
     BEFORE UPDATE ON users
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_challenges_updated_at
+    BEFORE UPDATE ON challenges
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();

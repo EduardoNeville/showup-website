@@ -6,6 +6,7 @@ import {
   checkEscrowContract,
   type CreateChallengeParams,
 } from "@/lib/web3/server/escrowService";
+import { insertChallenge, updateChallengeOnChain, markChallengeFailed } from "@/lib/db/challenges";
 
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
@@ -141,14 +142,32 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
   
   if (!isContractDeployed) {
     console.warn("Escrow contract not deployed. Storing challenge for later processing.");
-    // TODO: Store challenge in database for processing when contract is deployed
-    // For now, log the details
-    console.log("Challenge pending on-chain creation:", {
-      challengeId,
-      stripeSessionId: session.id,
-      amount: amountUSD,
-      customerEmail: session.customer_details?.email,
-    });
+
+    // Store challenge in database for processing when contract is deployed
+    try {
+      await insertChallenge({
+        challengeId: challengeId || `challenge_${Date.now()}`,
+        title: challengeTitle,
+        durationDays: challengeDuration,
+        amountUsd: amountUSD,
+        userEmail: session.customer_details?.email || "",
+        guarantors,
+        stripeSessionId: session.id,
+        stripePaymentIntentId: session.payment_intent as string,
+        metadataUri,
+      });
+
+      console.log("Challenge stored in database for later processing:", {
+        challengeId,
+        stripeSessionId: session.id,
+        amount: amountUSD,
+        customerEmail: session.customer_details?.email,
+      });
+    } catch (error) {
+      console.error("Failed to store challenge in database:", error);
+      // Continue anyway - don't block the webhook
+    }
+
     return;
   }
 
@@ -174,16 +193,67 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
       blockNumber: result.blockNumber?.toString(),
     });
 
-    // TODO: Store challenge mapping in database
-    // - Link Stripe session to on-chain challenge ID
-    // - Store user email for notifications
-    // - Send confirmation email to user
-    // - Send invitation emails to guarantors
+    // Store challenge mapping in database
+    try {
+      const startedAt = new Date();
+      const endsAt = new Date(startedAt);
+      endsAt.setDate(endsAt.getDate() + challengeDuration);
+
+      await insertChallenge({
+        challengeId: challengeId || `challenge_${Date.now()}`,
+        title: challengeTitle,
+        durationDays: challengeDuration,
+        amountUsd: amountUSD,
+        userEmail: session.customer_details?.email || "",
+        guarantors,
+        stripeSessionId: session.id,
+        stripePaymentIntentId: session.payment_intent as string,
+        metadataUri,
+      });
+
+      await updateChallengeOnChain(challengeId || `challenge_${Date.now()}`, {
+        status: 'created',
+        onChainChallengeId: result.challengeId,
+        transactionHash: result.transactionHash,
+        blockNumber: result.blockNumber,
+        startedAt,
+        endsAt,
+      });
+
+      console.log("Challenge stored successfully in database with on-chain data");
+    } catch (error) {
+      console.error("Failed to store challenge mapping in database:", error);
+      // Continue anyway - challenge was created on-chain successfully
+    }
+
+    // TODO: Send confirmation email to user
+    // TODO: Send invitation emails to guarantors
   } else {
     console.error("Failed to create challenge on-chain:", result.error);
+
+    // Store failed challenge for retry
+    try {
+      await insertChallenge({
+        challengeId: challengeId || `challenge_${Date.now()}`,
+        title: challengeTitle,
+        durationDays: challengeDuration,
+        amountUsd: amountUSD,
+        userEmail: session.customer_details?.email || "",
+        guarantors,
+        stripeSessionId: session.id,
+        stripePaymentIntentId: session.payment_intent as string,
+        metadataUri,
+      });
+
+      await markChallengeFailed(challengeId || `challenge_${Date.now()}`, result.error || 'Unknown error');
+
+      console.log("Failed challenge stored in database for retry");
+    } catch (dbError) {
+      console.error("Failed to store failed challenge in database:", dbError);
+    }
+
     // TODO: Implement retry logic or manual review queue
-    // - Store failed challenge for retry
-    // - Alert admin for manual intervention
-    // - Potentially refund user if repeated failures
+    // TODO: Alert admin for manual intervention
+    // TODO: Potentially refund user if repeated failures
   }
 }
