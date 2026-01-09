@@ -15,3 +15,4 @@
 
 - [x] Apple pay works
 - [ ] Ai should automate the process of creating the challenge
+- [ ] When you go to the link we should show them the exact challenge that your friend is linking you to it. And wether or not you will want to do this challenge too or create your own.
